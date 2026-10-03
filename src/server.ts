@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+
 import { auth } from "./auth.js";
 import { env } from "./env.js";
 import { originMatcher, originOf } from "./origins.js";
@@ -17,21 +18,22 @@ const app = new Hono();
 app.use(
   "/api/auth/*",
   cors({
-    origin: (origin) => (isTrusted(origin) ? origin : null),
-    allowMethods: ["GET", "POST"],
     allowHeaders: ["content-type"],
+    allowMethods: ["GET", "POST"],
     credentials: true,
     maxAge: 600,
-  }),
+    origin: (origin) => (isTrusted(origin) ? origin : null),
+  })
 );
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.get("/sign-in", (c) => {
   const requested = c.req.query("redirect") ?? "";
   const origin = originOf(requested);
-  const redirect = origin && (isTrusted(origin) || origin === new URL(env.authUrl).origin)
-    ? requested
-    : fallback;
+  const redirect =
+    origin && (isTrusted(origin) || origin === new URL(env.authUrl).origin)
+      ? requested
+      : fallback;
   return c.html(signInPage(redirect));
 });
 
