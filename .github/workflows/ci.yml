@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Migrations apply, roll back, and match schema.sql
+        run: |
+          npm run db:up
+          git diff --exit-code db/schema.sql
+          for _ in db/migrations/*.sql; do docker compose run --rm migrate --no-dump-schema rollback; done
+          docker compose run --rm migrate --no-dump-schema up
+
+      # Better Auth compares its expected tables with the database; anything
+      # printed beyond the "nothing to add" line is a missing migration.
+      - name: Migrations cover everything Better Auth needs
+        env:
+          AUTH_URL: http://localhost:3001
+          BETTER_AUTH_SECRET: ci-only-not-a-secret-ci-only-not-a-secret
+          DATABASE_URL: postgres://auth:auth@localhost:5433/auth
+          GOOGLE_CLIENT_ID: ci
+          GOOGLE_CLIENT_SECRET: ci
+          TRUSTED_ORIGINS: http://localhost:5173
+        run: |
+          out=$(npx tsx scripts/schema.ts 2>/dev/null)
+          echo "$out"
+          test "$out" = "-- nothing to add: the database matches Better Auth"
+
+      - name: Validate production compose
+        run: |
+          POSTGRES_PASSWORD=x BETTER_AUTH_SECRET=x GOOGLE_CLIENT_ID=x GOOGLE_CLIENT_SECRET=x \
+            docker compose -f compose.prod.yaml config --quiet
+
+      - name: Docker build
+        run: docker build -t auth .

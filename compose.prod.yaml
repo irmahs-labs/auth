@@ -1,0 +1,66 @@
+# The server. Deploys run `docker compose -f compose.prod.yaml …`; locally,
+# plain `docker compose` uses compose.yaml.
+#
+# .env beside this file is written by the deploy from GitHub secrets. The
+# database is reachable only on the internal network; Caddy reaches the
+# service on the shared `proxy` network as `auth:3001`.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: auth
+      # Read once, when the volume is first created. Changing the secret later
+      # does not change the database's password.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: auth
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth -d auth"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    networks: [internal]
+
+  migrate:
+    image: ghcr.io/amacneil/dbmate:2
+    profiles: [tools]
+    environment:
+      DATABASE_URL: postgres://auth:${POSTGRES_PASSWORD}@db:5432/auth?sslmode=disable
+      DBMATE_MIGRATIONS_DIR: /db/migrations
+      DBMATE_NO_DUMP_SCHEMA: "true"
+    volumes:
+      - ./db:/db:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+
+  auth:
+    build: .
+    image: auth
+    restart: unless-stopped
+    environment:
+      AUTH_URL: https://auth.irmahs.dev
+      TRUSTED_ORIGINS: https://irmahs.dev,https://*.irmahs.dev
+      COOKIE_DOMAIN: irmahs.dev
+      DATABASE_URL: postgres://auth:${POSTGRES_PASSWORD}@db:5432/auth
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set in .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set in .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set in .env}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      internal:
+      proxy:
+        aliases: [auth]
+
+networks:
+  internal:
+  proxy:
+    external: true
+
+volumes:
+  db_data:

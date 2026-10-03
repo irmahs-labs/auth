@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Deploy on server
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.AUTH_POSTGRES_PASSWORD }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          for name in POSTGRES_PASSWORD BETTER_AUTH_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
+            [ -n "${!name}" ] || { echo "Secret for $name is not set"; exit 1; }
+          done
+          # .env is sent over stdin so the secrets never appear in a command line
+          printf 'POSTGRES_PASSWORD=%s\nBETTER_AUTH_SECRET=%s\nGOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\n' \
+            "$POSTGRES_PASSWORD" "$BETTER_AUTH_SECRET" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" |
+          ssh deploy@${{ secrets.DEPLOY_HOST }} 'set -e
+            cd /srv/auth
+            [ -d .git ] || git clone https://github.com/${{ github.repository }}.git .
+            git fetch --depth 1 origin main
+            git reset --hard origin/main
+            (umask 077 && cat > .env)
+            export COMPOSE_FILE=compose.prod.yaml
+            docker compose up -d --wait db
+            docker compose run --rm migrate up
+            docker compose up -d --build --remove-orphans --wait auth
+            docker image prune -f
+            docker builder prune -f --filter until=168h'
