@@ -2,13 +2,12 @@
 // people here with ?redirect=<where to come back to>; signing in with Google
 // sets a session cookie for every *.irmahs.dev app and returns them there.
 
-// Safe inside a <script> block: JSON with "<" escaped cannot close the tag.
-function scriptJson(value: unknown): string {
-  return JSON.stringify(value).replace(/</g, "\\u003c");
-}
+// A string as a JavaScript literal that is safe inside a <script> block: with
+// "<" escaped, it cannot close the tag.
+const scriptString = (value: string): string =>
+  JSON.stringify(value).replaceAll("<", "\\u003c");
 
-export function signInPage(redirect: string): string {
-  return `<!doctype html>
+export const signInPage = (redirect: string): string => `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -49,7 +48,7 @@ export function signInPage(redirect: string): string {
   </div>
 </main>
 <script>
-  const redirect = ${scriptJson(redirect)};
+  const redirect = ${scriptString(redirect)};
   const $ = (id) => document.getElementById(id);
   const here = new URL(location.href);
   if (here.searchParams.has("error")) $("error").hidden = false;
@@ -88,4 +87,3 @@ export function signInPage(redirect: string): string {
 </body>
 </html>
 `;
-}
