@@ -5,7 +5,7 @@ import { env } from "./env.js";
 // One account for every irmahs.dev app. Google is the only way in, so there
 // are no passwords to store, reset or leak.
 export const auth = betterAuth({
-  appName: "irmahs.dev",
+  appName: "IrmaHS Labs",
   baseURL: env.authUrl,
   secret: env.secret,
   database: new pg.Pool({ connectionString: env.databaseUrl }),
