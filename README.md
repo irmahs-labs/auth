@@ -1,6 +1,6 @@
 # auth
 
-One account for every irmahs.dev app, at **https://auth.irmahs.dev**. People sign in once with Google, and the session cookie is shared by every `*.irmahs.dev` subdomain, so each app knows who they are without a sign-in of its own.
+One account for every irmahs.dev app, at **https://auth.irmahs.dev**. People see it as **IrmaHS Labs**: on the sign-in page, and on Google's consent screen (Google Cloud → irmahs-hub → Branding), which should keep the same name. People sign in once with Google, and the session cookie is shared by every `*.irmahs.dev` subdomain, so each app knows who they are without a sign-in of its own.
 
 Built on [Better Auth](https://www.better-auth.com/) and [Hono](https://hono.dev/), with its own Postgres database. Google is the only way in: there are no passwords to store, reset or leak.
 

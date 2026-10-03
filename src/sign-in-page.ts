@@ -1,4 +1,4 @@
-// The one page this service shows: "Sign in to irmahs.dev". An app sends
+// The one page this service shows: "Sign in to IrmaHS Labs". An app sends
 // people here with ?redirect=<where to come back to>; signing in with Google
 // sets a session cookie for every *.irmahs.dev app and returns them there.
 
@@ -14,7 +14,7 @@ export function signInPage(redirect: string): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Sign in · irmahs.dev</title>
+<title>Sign in · IrmaHS Labs</title>
 <style>
   :root { --bg: #f4f1ea; --card: #fff; --ink: #1f2a22; --muted: #5d6b60; --line: #d9d4c7; --accent: #2f5d3a; }
   @media (prefers-color-scheme: dark) {
@@ -37,7 +37,7 @@ export function signInPage(redirect: string): string {
 </head>
 <body>
 <main>
-  <h1>irmahs.dev</h1>
+  <h1>IrmaHS Labs</h1>
   <p id="lead">One account for every app.</p>
   <p id="error" class="error" hidden>That did not work. Please try again.</p>
   <div id="signed-out" hidden>
