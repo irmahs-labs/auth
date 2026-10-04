@@ -30,9 +30,12 @@ jobs:
           for name in POSTGRES_PASSWORD BETTER_AUTH_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
             [ -n "${!name}" ] || { echo "Secret for $name is not set"; exit 1; }
           done
+          # Percent-encoded for the postgres:// URLs: a / or @ in the password would
+          # otherwise break them, and a parser's error can print part of it.
+          POSTGRES_PASSWORD_URL=$(python3 -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["POSTGRES_PASSWORD"], safe=""))')
           # .env is sent over stdin so the secrets never appear in a command line
-          printf 'POSTGRES_PASSWORD=%s\nBETTER_AUTH_SECRET=%s\nGOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\n' \
-            "$POSTGRES_PASSWORD" "$BETTER_AUTH_SECRET" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" |
+          printf 'POSTGRES_PASSWORD=%s\nPOSTGRES_PASSWORD_URL=%s\nBETTER_AUTH_SECRET=%s\nGOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\n' \
+            "$POSTGRES_PASSWORD" "$POSTGRES_PASSWORD_URL" "$BETTER_AUTH_SECRET" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" |
           ssh deploy@${{ secrets.DEPLOY_HOST }} 'set -e
             cd /srv/auth
             [ -d .git ] || git clone https://github.com/${{ github.repository }}.git .
