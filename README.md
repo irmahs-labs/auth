@@ -14,7 +14,7 @@ browser ──▶ app.irmahs.dev ──"who is this?"──▶ auth:3001/api/aut
 
 1. **Not signed in?** Send the browser to the sign-in page with where to come back to:
    ```
-   https://auth.irmahs.dev/sign-in?redirect=https://sleepy-spinner.irmahs.dev/
+   https://auth.irmahs.dev/sign-in?redirect=https://pantry-spinner.irmahs.dev/
    ```
    Only `https://irmahs.dev` and `https://<one-label>.irmahs.dev` are accepted; anything else lands on the sign-in page itself.
 2. **Who is signed in?** From the app's own server, forward the browser's `Cookie` header:
