@@ -51,6 +51,8 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set in .env}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set in .env}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set in .env}
+      # Who may open each private app. Optional: without it, nobody can.
+      APP_ACCESS: ${APP_ACCESS:-}
     depends_on:
       db:
         condition: service_healthy
