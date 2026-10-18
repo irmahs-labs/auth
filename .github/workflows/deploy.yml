@@ -26,6 +26,8 @@ jobs:
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          # Optional, so not in the check below: who may open each private app.
+          APP_ACCESS: ${{ secrets.APP_ACCESS }}
         run: |
           for name in POSTGRES_PASSWORD BETTER_AUTH_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
             [ -n "${!name}" ] || { echo "Secret for $name is not set"; exit 1; }
@@ -34,8 +36,8 @@ jobs:
           # otherwise break them, and a parser's error can print part of it.
           POSTGRES_PASSWORD_URL=$(python3 -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["POSTGRES_PASSWORD"], safe=""))')
           # .env is sent over stdin so the secrets never appear in a command line
-          printf 'POSTGRES_PASSWORD=%s\nPOSTGRES_PASSWORD_URL=%s\nBETTER_AUTH_SECRET=%s\nGOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\n' \
-            "$POSTGRES_PASSWORD" "$POSTGRES_PASSWORD_URL" "$BETTER_AUTH_SECRET" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" |
+          printf 'POSTGRES_PASSWORD=%s\nPOSTGRES_PASSWORD_URL=%s\nBETTER_AUTH_SECRET=%s\nGOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\nAPP_ACCESS=%s\n' \
+            "$POSTGRES_PASSWORD" "$POSTGRES_PASSWORD_URL" "$BETTER_AUTH_SECRET" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" "$APP_ACCESS" |
           ssh deploy@${{ secrets.DEPLOY_HOST }} 'set -e
             cd /srv/auth
             [ -d .git ] || git clone https://github.com/${{ github.repository }}.git .

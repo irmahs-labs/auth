@@ -26,6 +26,27 @@ browser ──▶ app.irmahs.dev ──"who is this?"──▶ auth:3001/api/aut
 
 An app never talks to Google and never sees the client secret.
 
+## Private apps
+
+An app only a few people may open, such as an admin tool, needs no sign-in code of its own. Caddy asks this service before every request to it, and only the people listed for it get through:
+
+1. Add the app to the `APP_ACCESS` secret: its name, `=`, and the Google emails allowed in, comma-separated. Separate apps with `;`:
+   ```
+   my-app=you@gmail.com,friend@gmail.com;other-app=you@gmail.com
+   ```
+   Redeploy (Actions → Deploy → Run workflow) for a change to take effect.
+2. In irmahs-labs/proxy, put `import admins-only my-app` in the app's site block.
+
+Caddy calls `GET /api/access/my-app` with the visitor's cookie, which answers:
+
+| Who | Answer | What the visitor sees |
+| --- | --- | --- |
+| Signed out | 302 to `/sign-in?redirect=<where they were going>` | Google sign-in, then the app |
+| Signed in, listed for the app | 204, with `X-Auth-User-Id` and `X-Auth-User-Email` | The app, which reads who it is from those headers |
+| Signed in, not listed | 403 | "This app is private", with a link to use another account |
+
+An app missing from `APP_ACCESS` lets nobody in. Emails are compared in lowercase, and only Google-verified ones count.
+
 ## Local development
 
 Needs Node 22+ and Docker.
@@ -72,5 +93,6 @@ Secrets (Settings → Secrets and variables → Actions):
 | `AUTH_POSTGRES_PASSWORD` | The accounts database's password. Read only when the database is first created |
 | `BETTER_AUTH_SECRET` | Signs session cookies. `openssl rand -base64 32`; changing it signs everyone out |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | From the Google client above |
+| `APP_ACCESS` | Optional. Who may open each private app; see [Private apps](#private-apps) |
 
 The production settings that are not secret (`AUTH_URL`, `TRUSTED_ORIGINS`, `COOKIE_DOMAIN`) are in `compose.prod.yaml`.
