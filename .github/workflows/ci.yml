@@ -6,44 +6,14 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# One job per check, so a pull request lists each one with its own result.
 jobs:
-  lint:
-    name: Lint and format
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - name: Ultracite
-        run: npm run check
-
-  typecheck:
-    name: Type-check
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-
-  test:
-    name: Tests
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm test
+  # Lint and format, Type-check, Tests, Build and Docker build, shared by every
+  # irmahs-labs repo (irmahs-labs/workflows); only what differs here is passed.
+  app:
+    uses: irmahs-labs/workflows/.github/workflows/app-ci.yml@main
+    with:
+      compose-check: POSTGRES_PASSWORD=x POSTGRES_PASSWORD_URL=x BETTER_AUTH_SECRET=x GOOGLE_CLIENT_ID=x GOOGLE_CLIENT_SECRET=x docker compose -f compose.prod.yaml config --quiet
+      docker-image: auth
 
   migrations:
     name: Migrations
@@ -78,26 +48,12 @@ jobs:
           echo "$out"
           test "$out" = "-- nothing to add: the database matches Better Auth"
 
-  docker:
-    name: Docker build
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Validate production compose
-        run: |
-          POSTGRES_PASSWORD=x POSTGRES_PASSWORD_URL=x BETTER_AUTH_SECRET=x GOOGLE_CLIENT_ID=x GOOGLE_CLIENT_SECRET=x \
-            docker compose -f compose.prod.yaml config --quiet
-
-      - name: Docker build
-        run: docker build -t auth .
-
   # The branch rules require a check named "checks". It fails if any job
   # above failed, was cancelled or skipped; list new jobs in needs.
   checks:
     name: checks
     if: always()
-    needs: [lint, typecheck, test, migrations, docker]
+    needs: [app, migrations]
     runs-on: ubuntu-24.04
     steps:
       - name: A job did not pass
