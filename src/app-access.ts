@@ -4,21 +4,27 @@
 // letting the wrong people in.
 export const parseAppAccess = (value: string): Map<string, Set<string>> => {
   const access = new Map<string, Set<string>>();
+
   for (const entry of value.split(";")) {
     if (!entry.trim()) {
       continue;
     }
+
     const [name = "", emails = ""] = entry.split("=");
+
     const people = emails
       .split(",")
       .map((email) => email.trim().toLowerCase())
       .filter(Boolean);
+
     if (!/^[a-z0-9-]+$/u.test(name.trim()) || people.length === 0) {
       throw new Error(
         `APP_ACCESS has a bad entry: "${entry}"; see .env.example`
       );
     }
+
     access.set(name.trim(), new Set(people));
   }
+
   return access;
 };

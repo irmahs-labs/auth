@@ -9,6 +9,7 @@ import { originMatcher, originOf } from "./origins.js";
 import { signInPage } from "./sign-in-page.js";
 
 const isTrusted = originMatcher(env.trustedOrigins);
+
 // Where someone lands with no ?redirect, or with one we will not send them to.
 const fallback = new URL("/sign-in", env.authUrl).href;
 
@@ -26,6 +27,7 @@ app.use(
     origin: (origin) => (isTrusted(origin) ? origin : null),
   })
 );
+
 app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.route(
@@ -41,14 +43,17 @@ app.route(
 app.get("/sign-in", (c) => {
   const requested = c.req.query("redirect") ?? "";
   const origin = originOf(requested);
+
   const redirect =
     origin && (isTrusted(origin) || origin === new URL(env.authUrl).origin)
       ? requested
       : fallback;
+
   return c.html(signInPage(redirect));
 });
 
 app.get("/", (c) => c.redirect("/sign-in"));
+
 app.get("/healthz", (c) => c.text("ok"));
 
 serve({ fetch: app.fetch, port: env.port }, (info) => {

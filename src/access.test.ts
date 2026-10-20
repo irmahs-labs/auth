@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { accessRoutes, type Visitor } from "./access.js";
+import { accessRoutes } from "./access.js";
+import type { Visitor } from "./access.js";
 import { parseAppAccess } from "./app-access.js";
 import { originMatcher } from "./origins.js";
 
@@ -22,7 +23,7 @@ const ask = (
       "alma-housila=irma.houversing@gmail.com,friend@gmail.com;other=someone@gmail.com"
     ),
     fallback,
-    getVisitor: async () => who,
+    getVisitor: () => Promise.resolve(who),
     isTrusted: originMatcher(["https://*.irmahs.dev"]),
   }).request(`/api/access/${app}`, {
     headers: { "x-forwarded-host": host, "x-forwarded-uri": uri },
@@ -87,6 +88,7 @@ describe("APP_ACCESS", () => {
     const access = parseAppAccess(
       " alma-housila = Irma@Gmail.com , friend@gmail.com ;other=a@b.c;"
     );
+
     expect([...access.keys()]).toEqual(["alma-housila", "other"]);
     expect([...(access.get("alma-housila") ?? [])]).toEqual([
       "irma@gmail.com",

@@ -3,7 +3,11 @@
 // "account.exe" window. A page gives its title, what goes inside the window,
 // and an optional <script>.
 
-export const page = (title: string, body: string, script = ""): string => `<!doctype html>
+export const page = (
+  title: string,
+  body: string,
+  script = ""
+): string => `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">

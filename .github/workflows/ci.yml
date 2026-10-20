@@ -8,6 +8,19 @@ on:
 
 # One job per check, so a pull request lists each one with its own result.
 jobs:
+  lint:
+    name: Lint and format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Ultracite
+        run: npm run check
+
   typecheck:
     name: Type-check
     runs-on: ubuntu-24.04
@@ -84,7 +97,7 @@ jobs:
   checks:
     name: checks
     if: always()
-    needs: [typecheck, test, migrations, docker]
+    needs: [lint, typecheck, test, migrations, docker]
     runs-on: ubuntu-24.04
     steps:
       - name: A job did not pass

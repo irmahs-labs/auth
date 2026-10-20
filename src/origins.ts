@@ -4,6 +4,7 @@
 
 const toPattern = (origin: string): RegExp => {
   const escaped = origin.replaceAll(/[.+?^${}()|[\]\\]/gu, "\\$&");
+
   return new RegExp(`^${escaped.replace("*", "[a-z0-9-]+")}$`, "u");
 };
 
@@ -11,6 +12,7 @@ export const originMatcher = (
   trusted: string[]
 ): ((origin: string) => boolean) => {
   const patterns = trusted.map(toPattern);
+
   return (origin) => patterns.some((pattern) => pattern.test(origin));
 };
 
@@ -18,6 +20,7 @@ export const originMatcher = (
 export const originOf = (url: string): string | null => {
   try {
     const parsed = new URL(url);
+
     return parsed.protocol === "https:" || parsed.protocol === "http:"
       ? parsed.origin
       : null;
