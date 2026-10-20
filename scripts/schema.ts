@@ -12,9 +12,11 @@ import { auth } from "../src/auth.js";
 const { compileMigrations } = await getMigrations(auth.options);
 const sql = await compileMigrations();
 const statements = sql.replace(/;\s*$/u, "").trim();
+
 console.log(
   statements
     ? `${statements};`
     : "-- nothing to add: the database matches Better Auth"
 );
+
 process.exit(0);

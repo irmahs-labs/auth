@@ -57,6 +57,7 @@ npm install
 npm run db:up            # Postgres on localhost:5433, migrations applied
 npm run dev              # http://localhost:3001/sign-in
 npm test                 # who gets into a private app, and where they are sent
+npm run check            # Ultracite: lint and format, as CI does
 ```
 
 `.env` is ignored by git. Locally there is no `COOKIE_DOMAIN`: every port on `localhost` already shares cookies, so an app on `localhost:5173` sees the session from `localhost:3001`.

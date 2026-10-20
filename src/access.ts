@@ -8,7 +8,7 @@ export type Visitor = {
   user: { email: string; emailVerified: boolean; id: string };
 } | null;
 
-export type AccessOptions = {
+export interface AccessOptions {
   // Private apps and who may open them (APP_ACCESS).
   appAccess: Map<string, Set<string>>;
   // The sign-in page, where the visitor is sent to sign in and back.
@@ -16,7 +16,7 @@ export type AccessOptions = {
   // Who is asking, from the cookie Caddy passes on.
   getVisitor: (headers: Headers) => Promise<Visitor>;
   isTrusted: (origin: string) => boolean;
-};
+}
 
 // Private apps. Caddy asks here before every request to one (forward_auth in
 // irmahs-labs/proxy), passing on the visitor's cookie and where they were
@@ -35,15 +35,20 @@ export const accessRoutes = ({
     const signIn = `${fallback}?redirect=${encodeURIComponent(back)}`;
 
     const visitor = await getVisitor(c.req.raw.headers);
+
     if (!visitor) {
       return c.redirect(signIn);
     }
+
     const email = visitor.user.email.toLowerCase();
     const allowed = appAccess.get(c.req.param("app"));
+
     if (!visitor.user.emailVerified || !allowed?.has(email)) {
       return c.html(noAccessPage(email, signIn), 403);
     }
+
     c.header("x-auth-user-id", visitor.user.id);
     c.header("x-auth-user-email", email);
+
     return c.body(null, 204);
   });
