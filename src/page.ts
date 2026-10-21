@@ -53,7 +53,7 @@ export const page = (
          background-image: radial-gradient(var(--pattern-dot) 2.4px, transparent 2.8px);
          background-size: 44px 44px;
          font: 400 16px/1.4 var(--body); }
-  /* The shapes from the Sleek Matcha LinkedIn banner, scattered around the
+  /* The shapes from the Cute Matcha LinkedIn banner, scattered around the
      screen behind the window. --u is one banner pixel: 1px on a wide screen,
      shrinking to 0.55px on a phone. */
   .backdrop { --u: clamp(0.55px, 0.07vw, 1px); position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
