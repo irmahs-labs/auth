@@ -1,5 +1,5 @@
 // The window every page of this service is drawn in: Cute Matcha's role
-// tokens, in Light Matcha or Dark Matcha (green tea) as the device prefers,
+// tokens, in Light Matcha or Dark Matcha as the device prefers,
 // with the Funky Background's shapes behind an "account.exe" window. A page gives its title, what goes inside the window,
 // and an optional <script>.
 
@@ -19,7 +19,7 @@ export const page = (
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito+Sans:wght@400;700&display=swap">
 <style>
   /* Cute Matcha's role tokens, named by job: Light Matcha, then Dark Matcha
-     (green tea) when the device asks for dark. Pick a token by what the
+     when the device asks for dark. Pick a token by what the
      thing is, never by its hex. */
   :root {
     --ground: #f3f1c8; --panel: #f7f8de; --raised: #fffdf0;
