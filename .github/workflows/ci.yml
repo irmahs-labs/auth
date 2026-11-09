@@ -6,6 +6,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Reads the repository and nothing else.
+permissions:
+  contents: read
+
 jobs:
   # Lint and format, Type-check, Tests, Build and Docker build, shared by every
   # irmahs-labs repo (irmahs-labs/workflows); only what differs here is passed.
@@ -23,7 +27,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
 
       - name: Migrations apply, roll back, and match schema.sql
         run: |
@@ -43,7 +47,7 @@ jobs:
           GOOGLE_CLIENT_SECRET: ci
           TRUSTED_ORIGINS: http://localhost:5173
         run: |
-          out=$(npx tsx scripts/schema.ts 2>/dev/null)
+          out=$(./node_modules/.bin/tsx scripts/schema.ts 2>/dev/null)
           echo "$out"
           test "$out" = "-- nothing to add: the database matches Better Auth"
 

@@ -2,7 +2,7 @@
 FROM node:24-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 # --omit=optional too: Better Auth lists vitest as an optional peer, which
