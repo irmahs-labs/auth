@@ -26,9 +26,7 @@ services:
     networks: [internal]
 
   migrate:
-    # Pinned: 2.38 dumps schema.sql with per-column lines that change on
-    # every run, so CI's schema check can never match. Raise it by hand.
-    image: ghcr.io/amacneil/dbmate:2.37.0
+    image: ghcr.io/amacneil/dbmate:2
     profiles: [tools]
     environment:
       DATABASE_URL: postgres://auth:${POSTGRES_PASSWORD_URL:?set in .env}@db:5432/auth?sslmode=disable
