@@ -5,7 +5,10 @@
 #   npm run db:new -- <name>    create db/migrations/<timestamp>_<name>.sql
 services:
   db:
-    image: postgres:17-alpine
+    # Pinned for the schema.sql check: a 17.12 server's dump adds per-column
+    # lines whose numbers change every run, so the committed file never
+    # matches. Production keeps postgres:17-alpine.
+    image: postgres:17.11-alpine
     environment:
       POSTGRES_USER: auth
       POSTGRES_PASSWORD: auth
