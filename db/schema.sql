@@ -199,4 +199,5 @@ ALTER TABLE ONLY public.session
 --
 
 INSERT INTO public.schema_migrations (version) VALUES
-    ('20261003210000');
+    ('20261003210000'),
+    ('20261118120000');

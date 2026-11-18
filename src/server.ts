@@ -1,12 +1,14 @@
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
 import { accessRoutes } from "./access.js";
-import { auth } from "./auth.js";
+import { auth, pool } from "./auth.js";
 import { env } from "./env.js";
 import { originMatcher, originOf } from "./origins.js";
 import { signInPage } from "./sign-in-page.js";
+import { startSweeping } from "./sweep.js";
 
 const isTrusted = originMatcher(env.trustedOrigins);
 
@@ -55,6 +57,20 @@ app.get("/sign-in", (c) => {
 app.get("/", (c) => c.redirect("/sign-in"));
 
 app.get("/healthz", (c) => c.text("ok"));
+
+// The page's two fonts, served from here so no visitor's browser asks
+// Google for them.
+app.use(
+  "/fonts/*",
+  serveStatic({
+    onFound: (_path, c) => {
+      c.header("Cache-Control", "public, max-age=31536000, immutable");
+    },
+    root: "./public",
+  })
+);
+
+startSweeping(pool);
 
 serve({ fetch: app.fetch, port: env.port }, (info) => {
   console.log(`auth listening on :${info.port} as ${env.authUrl}`);

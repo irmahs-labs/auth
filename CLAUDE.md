@@ -46,6 +46,8 @@ The PostToolUse hook in `.claude/hooks/ultracite.sh` runs Ultracite and the type
 
 The one Google sign-in for every irmahs.dev app, at auth.irmahs.dev: Better Auth on Hono, with its own Postgres database. Google is the only way in, so there are no passwords. The session cookie is shared on `*.irmahs.dev` (`COOKIE_DOMAIN` in production), so an app learns who is signed in by forwarding the browser's cookie to `/api/auth/get-session`.
 
+**What it keeps, and no more** (irmahs.dev/privacy, in irmahs-labs/landing-page `src/lib/legal.ts`, promises it): a person's name, email, Google picture link and Google account id, and their signed-in browsers. `databaseHooks` in `src/auth.ts` empty a session's `ipAddress` and `userAgent` and an account's Google tokens before they are saved; the IP is only read in memory for rate limits. Anyone can delete their account from the sign-in page (`user.deleteUser`, which Better Auth allows from a session less than a day old). `src/sweep.ts` deletes, every day, the accounts nobody has used for two years (the CNIL's recommendation). The page's fonts are served from `public/fonts`, never from Google. Keeping anything more about people means updating the privacy policy in the same change.
+
 `GET /api/access/:app` is Caddy's `forward_auth` target for private apps (in irmahs-labs/proxy): 302 to the sign-in page when signed out, 204 with `X-Auth-User-Id` and `X-Auth-User-Email` when the visitor's Google-verified email is listed for the app, 403 otherwise. Who may open each private app is in the `APP_ACCESS` secret (`.env.example` shows the format).
 
 ## Database

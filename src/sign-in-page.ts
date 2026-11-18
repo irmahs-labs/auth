@@ -25,11 +25,15 @@ export const signInPage = (redirect: string): string =>
         </svg></span>
         <span>continue with Google</span>
       </button>
+      <p class="notice">Google shares your name, email address and profile picture with IrmaHS Labs, to sign you in to every irmahs.dev app. Nothing else is kept. <a href="https://irmahs.dev/privacy">How your data is used</a></p>
     </div>
     <div id="signed-in" hidden>
       <a id="continue" class="button primary" href="#">continue</a>
       <button id="sign-out" type="button">sign out</button>
+      <button id="delete" class="danger" type="button">delete my account</button>
     </div>
+    <p id="deleted" class="note" role="status" hidden>Your account is deleted. To also delete what you saved in the apps, write to <a href="mailto:privacy@irmahs.dev">privacy@irmahs.dev</a>.</p>
+    <p id="fresh" class="note" role="alert" hidden>For your safety, sign in again, then delete your account.</p>
 `,
     `<script>
   const redirect = ${scriptString(redirect)};
@@ -56,6 +60,26 @@ export const signInPage = (redirect: string): string =>
   $("sign-out").addEventListener("click", async () => {
     await api("/sign-out", {});
     location.reload();
+  });
+
+  $("delete").addEventListener("click", async () => {
+    if (!confirm("Delete your IrmaHS Labs account? You will be signed out of every irmahs.dev app. This cannot be undone.")) return;
+    $("delete").disabled = true;
+    const response = await fetch("/api/auth/delete-user", {
+      method: "POST", credentials: "include",
+      headers: { "content-type": "application/json" }, body: "{}",
+    });
+    $("signed-in").hidden = true;
+    if (response.ok) {
+      $("lead").textContent = "one account for every app";
+      $("deleted").hidden = false;
+    } else {
+      // Better Auth deletes only from a sign-in less than a day old
+      await api("/sign-out", {});
+      $("fresh").hidden = false;
+      $("signed-out").hidden = false;
+    }
+    $("delete").disabled = false;
   });
 
   api("/get-session").then((session) => {
