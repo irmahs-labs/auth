@@ -14,10 +14,14 @@ export const page = (
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>${title}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito+Sans:wght@400;700&display=swap">
 <style>
+  /* Fredoka and Nunito Sans, served from here (public/fonts, SIL Open Font
+     Licence), so no visitor's browser asks Google for them. */
+  @font-face { font-family: "Fredoka"; font-weight: 400; font-display: swap; src: url("/fonts/fredoka-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Fredoka"; font-weight: 500; font-display: swap; src: url("/fonts/fredoka-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Fredoka"; font-weight: 600; font-display: swap; src: url("/fonts/fredoka-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Nunito Sans"; font-weight: 400; font-display: swap; src: url("/fonts/nunito-sans-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Nunito Sans"; font-weight: 700; font-display: swap; src: url("/fonts/nunito-sans-latin-700-normal.woff2") format("woff2"); }
   /* Cute Matcha's role tokens, named by job: Light Matcha, then Dark Matcha
      when the device asks for dark. Pick a token by what the
      thing is, never by its hex. */
@@ -106,6 +110,14 @@ export const page = (
        background: var(--white); border: var(--stroke-base) solid var(--outline); }
   @media (max-width: 360px) { .body { padding: 22px 14px 16px; } }
   [hidden] { display: none !important; }
+  /* The legal pages, under the window's content, as every irmahs.dev app ends */
+  .legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin: 18px 0 0; padding: 0;
+           list-style: none; font: 600 13px/1.4 var(--body); }
+  .legal a { display: inline-block; padding: 4px 2px; color: var(--on-accent); text-decoration: underline; text-underline-offset: 3px; }
+  .notice { margin: 14px 0 0; font-size: 14px; line-height: 1.45; }
+  .notice a, .note a { color: var(--on-accent); text-decoration: underline; text-underline-offset: 3px; }
+  .note { margin: 14px 0 0; font-size: 14px; }
+  button.danger { margin-top: 24px; min-height: 44px; font-size: 14px; background: var(--panel); color: var(--text); }
 </style>
 </head>
 <body>
@@ -181,7 +193,13 @@ export const page = (
     </svg>
   </div>
   <div class="body">
-${body}  </div>
+${body}    <ul class="legal" aria-label="Legal">
+      <li><a href="https://irmahs.dev/legal">Legal notice</a></li>
+      <li><a href="https://irmahs.dev/privacy">Privacy</a></li>
+      <li><a href="https://irmahs.dev/terms">Terms of use</a></li>
+      <li><a href="https://irmahs.dev/cookies">Cookies</a></li>
+    </ul>
+  </div>
 </main>
 ${script}</body>
 </html>
