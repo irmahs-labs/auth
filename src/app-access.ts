@@ -10,20 +10,21 @@ export const parseAppAccess = (value: string): Map<string, Set<string>> => {
       continue;
     }
 
-    const [name = "", emails = ""] = entry.split("=");
+    const [rawName = "", emails = ""] = entry.split("=");
+    const name = rawName.trim();
 
     const people = emails
       .split(",")
       .map((email) => email.trim().toLowerCase())
       .filter(Boolean);
 
-    if (!/^[a-z0-9-]+$/u.test(name.trim()) || people.length === 0) {
+    if (!/^[a-z0-9-]+$/u.test(name) || people.length === 0) {
       throw new Error(
         `APP_ACCESS has a bad entry: "${entry}"; see .env.example`
       );
     }
 
-    access.set(name.trim(), new Set(people));
+    access.set(name, new Set(people));
   }
 
   return access;
