@@ -7,13 +7,17 @@ export const pool = new Pool({ connectionString: env.databaseUrl });
 
 // What Google hands back that no app uses: they are never kept, so the
 // account row holds only who the person is (see irmahs.dev/privacy).
-const NO_TOKENS = {
-  accessToken: null,
-  accessTokenExpiresAt: null,
-  idToken: null,
-  refreshToken: null,
-  refreshTokenExpiresAt: null,
-};
+const withoutTokens = <T>(account: T) =>
+  Promise.resolve({
+    data: {
+      ...account,
+      accessToken: null,
+      accessTokenExpiresAt: null,
+      idToken: null,
+      refreshToken: null,
+      refreshTokenExpiresAt: null,
+    },
+  });
 
 // One account for every irmahs.dev app. Google is the only way in, so there
 // are no passwords to store, reset or leak.
@@ -39,14 +43,8 @@ export const auth = betterAuth({
   // inactive-account sweep reads (sweep.ts).
   databaseHooks: {
     account: {
-      create: {
-        before: (account) =>
-          Promise.resolve({ data: { ...account, ...NO_TOKENS } }),
-      },
-      update: {
-        before: (account) =>
-          Promise.resolve({ data: { ...account, ...NO_TOKENS } }),
-      },
+      create: { before: withoutTokens },
+      update: { before: withoutTokens },
     },
     session: {
       create: {
